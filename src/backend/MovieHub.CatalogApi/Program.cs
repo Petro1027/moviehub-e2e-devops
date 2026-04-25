@@ -13,6 +13,9 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+MovieService movieService = app.Services.GetRequiredService<MovieService>();
+await movieService.SeedMoviesAsync();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

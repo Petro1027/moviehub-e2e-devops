@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MovieHub.CatalogApi.Dtos;
 using MovieHub.CatalogApi.Models;
@@ -38,15 +39,15 @@ public class MovieService
         {
             FilterDefinition<Movie> titleFilter = Builders<Movie>.Filter.Regex(
                 movie => movie.Title,
-                new MongoDB.Bson.BsonRegularExpression(search, "i"));
+                new BsonRegularExpression(search, "i"));
 
             FilterDefinition<Movie> directorFilter = Builders<Movie>.Filter.Regex(
                 movie => movie.Director,
-                new MongoDB.Bson.BsonRegularExpression(search, "i"));
+                new BsonRegularExpression(search, "i"));
 
             FilterDefinition<Movie> genreFilter = Builders<Movie>.Filter.Regex(
                 movie => movie.Genre,
-                new MongoDB.Bson.BsonRegularExpression(search, "i"));
+                new BsonRegularExpression(search, "i"));
 
             filter = Builders<Movie>.Filter.Or(titleFilter, directorFilter, genreFilter);
         }
@@ -130,5 +131,71 @@ public class MovieService
             .SortByDescending(movie => movie.Rating)
             .Limit(5)
             .ToListAsync();
+    }
+
+    public async Task SeedMoviesAsync()
+    {
+        long movieCount = await _moviesCollection.CountDocumentsAsync(Builders<Movie>.Filter.Empty);
+
+        if (movieCount > 0)
+        {
+            return;
+        }
+
+        List<Movie> seedMovies = new()
+        {
+            new Movie
+            {
+                Title = "The Matrix",
+                Director = "The Wachowskis",
+                Genre = "Sci-Fi",
+                Year = 1999,
+                Rating = 9.1,
+                Description = "A hacker discovers that reality is a simulation.",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Movie
+            {
+                Title = "Inception",
+                Director = "Christopher Nolan",
+                Genre = "Sci-Fi",
+                Year = 2010,
+                Rating = 8.8,
+                Description = "A thief enters people's dreams to steal secrets.",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Movie
+            {
+                Title = "The Lord of the Rings: The Fellowship of the Ring",
+                Director = "Peter Jackson",
+                Genre = "Fantasy",
+                Year = 2001,
+                Rating = 8.9,
+                Description = "A young hobbit begins a journey to destroy a powerful ring.",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Movie
+            {
+                Title = "Interstellar",
+                Director = "Christopher Nolan",
+                Genre = "Sci-Fi",
+                Year = 2014,
+                Rating = 8.7,
+                Description = "A team travels through a wormhole in search of a new home for humanity.",
+                CreatedAt = DateTime.UtcNow
+            },
+            new Movie
+            {
+                Title = "The Dark Knight",
+                Director = "Christopher Nolan",
+                Genre = "Action",
+                Year = 2008,
+                Rating = 9.0,
+                Description = "Batman faces the Joker in Gotham City.",
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await _moviesCollection.InsertManyAsync(seedMovies);
     }
 }
