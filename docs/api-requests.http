@@ -1,0 +1,53 @@
+@baseUrl = http://localhost:5052
+@movieId = replace-with-created-movie-id
+
+### Get all movies with default pagination
+GET {{baseUrl}}/api/movies
+
+
+### Get movies with pagination
+GET {{baseUrl}}/api/movies?page=1&pageSize=2
+
+
+### Search movies
+GET {{baseUrl}}/api/movies?search=matrix
+
+
+### Get top rated movies
+GET {{baseUrl}}/api/movies/top-rated
+
+
+### Create movie
+POST {{baseUrl}}/api/movies
+Content-Type: application/json
+
+{
+  "title": "Interstellar",
+  "director": "Christopher Nolan",
+  "genre": "Sci-Fi",
+  "year": 2014,
+  "rating": 8.7,
+  "description": "A team travels through a wormhole in search of a new home for humanity."
+}
+
+
+### Get movie by id
+GET {{baseUrl}}/api/movies/{{movieId}}
+
+
+### Update movie
+PUT {{baseUrl}}/api/movies/{{movieId}}
+Content-Type: application/json
+
+{
+  "title": "Interstellar",
+  "director": "Christopher Nolan",
+  "genre": "Sci-Fi",
+  "year": 2014,
+  "rating": 9.0,
+  "description": "Updated description: astronauts travel through a wormhole to find a new home for humanity."
+}
+
+
+### Delete movie
+DELETE {{baseUrl}}/api/movies/{{movieId}}
