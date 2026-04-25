@@ -1,8 +1,13 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace MovieHub.CatalogApi.Models;
 
 public class Movie
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? Id { get; set; }
 
     public string Title { get; set; } = string.Empty;
 
