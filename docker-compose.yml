@@ -1,0 +1,16 @@
+services:
+  mongodb:
+    image: mongo:8
+    container_name: moviehub-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: moviehub
+      MONGO_INITDB_ROOT_PASSWORD: moviehub-password
+      MONGO_INITDB_DATABASE: moviehub
+    volumes:
+      - moviehub-mongo-data:/data/db
+
+volumes:
+  moviehub-mongo-data:
