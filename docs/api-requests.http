@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:5052
 @movieId = replace-with-created-movie-id
 
-### Get all movies with default pagination
+### Health check - Get all movies
 GET {{baseUrl}}/api/movies
 
 
@@ -9,8 +9,8 @@ GET {{baseUrl}}/api/movies
 GET {{baseUrl}}/api/movies?page=1&pageSize=2
 
 
-### Search movies
-GET {{baseUrl}}/api/movies?search=matrix
+### Search movies by title, director or genre
+GET {{baseUrl}}/api/movies?search=nolan
 
 
 ### Get top rated movies
@@ -22,12 +22,12 @@ POST {{baseUrl}}/api/movies
 Content-Type: application/json
 
 {
-  "title": "Interstellar",
-  "director": "Christopher Nolan",
+  "title": "Blade Runner 2049",
+  "director": "Denis Villeneuve",
   "genre": "Sci-Fi",
-  "year": 2014,
-  "rating": 8.7,
-  "description": "A team travels through a wormhole in search of a new home for humanity."
+  "year": 2017,
+  "rating": 8.0,
+  "description": "A young blade runner discovers a secret that could change society."
 }
 
 
@@ -40,14 +40,18 @@ PUT {{baseUrl}}/api/movies/{{movieId}}
 Content-Type: application/json
 
 {
-  "title": "Interstellar",
-  "director": "Christopher Nolan",
+  "title": "Blade Runner 2049",
+  "director": "Denis Villeneuve",
   "genre": "Sci-Fi",
-  "year": 2014,
-  "rating": 9.0,
-  "description": "Updated description: astronauts travel through a wormhole to find a new home for humanity."
+  "year": 2017,
+  "rating": 8.5,
+  "description": "Updated description: a blade runner uncovers a secret connected to the past."
 }
 
 
 ### Delete movie
 DELETE {{baseUrl}}/api/movies/{{movieId}}
+
+
+### Verify movie was deleted
+GET {{baseUrl}}/api/movies/{{movieId}}
