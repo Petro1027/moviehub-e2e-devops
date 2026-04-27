@@ -1,0 +1,44 @@
+@catalogBaseUrl = http://localhost:5052
+@reviewsBaseUrl = http://localhost:5053
+
+@movieId = replace-with-existing-movie-id
+@reviewId = replace-with-created-review-id
+
+### Get movies from Catalog API
+GET {{catalogBaseUrl}}/api/movies
+
+
+### Get reviews by movie id
+GET {{reviewsBaseUrl}}/api/reviews/movie/{{movieId}}
+
+
+### Create review for movie
+POST {{reviewsBaseUrl}}/api/reviews
+Content-Type: application/json
+
+{
+  "movieId": "{{movieId}}",
+  "reviewerName": "Gergo",
+  "score": 5,
+  "comment": "Nagyon jo film."
+}
+
+
+### Create invalid review - score should fail
+POST {{reviewsBaseUrl}}/api/reviews
+Content-Type: application/json
+
+{
+  "movieId": "{{movieId}}",
+  "reviewerName": "Teszt Elek",
+  "score": 9,
+  "comment": "Ez hibas score, mert 1 es 5 kozott kell lennie."
+}
+
+
+### Delete review
+DELETE {{reviewsBaseUrl}}/api/reviews/{{reviewId}}
+
+
+### Verify deleted review by movie id
+GET {{reviewsBaseUrl}}/api/reviews/movie/{{movieId}}
