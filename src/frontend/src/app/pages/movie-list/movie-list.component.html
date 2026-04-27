@@ -49,6 +49,10 @@
       <p class="description">
         {{ movie.description }}
       </p>
+
+      <a class="details-link" [routerLink]="['/movies', movie.id]">
+        Részletek
+      </a>
     </article>
   </div>
 

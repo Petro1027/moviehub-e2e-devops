@@ -1,0 +1,109 @@
+<section class="movie-details-page">
+  <a class="back-link" routerLink="/">← Vissza a filmekhez</a>
+
+  <div class="loading-state" *ngIf="isLoading">
+    Film betöltése...
+  </div>
+
+  <div class="error-state" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <ng-container *ngIf="!isLoading && !errorMessage && movie">
+    <article class="details-card">
+      <div class="details-header">
+        <div>
+          <p class="eyebrow">{{ movie.genre }}</p>
+          <h1>{{ movie.title }}</h1>
+          <p class="meta">{{ movie.director }} · {{ movie.year }}</p>
+        </div>
+
+        <div class="rating-card">
+          <span>Értékelés</span>
+          <strong>{{ movie.rating }}/10</strong>
+        </div>
+      </div>
+
+      <p class="description">
+        {{ movie.description }}
+      </p>
+    </article>
+
+    <section class="reviews-section">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Reviews API</p>
+          <h2>Értékelések</h2>
+        </div>
+
+        <span class="review-count">{{ reviews.length }} db</span>
+      </div>
+
+      <form class="review-form" (submit)="$event.preventDefault(); createReview()">
+        <div class="form-row">
+          <label>
+            Név
+            <input
+              type="text"
+              [value]="reviewerName"
+              placeholder="Például: Gergo"
+              (input)="onReviewerNameChanged($any($event.target).value)"
+            />
+          </label>
+
+          <label>
+            Pontszám
+            <select [value]="score" (change)="onScoreChanged($any($event.target).value)">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          Komment
+          <textarea
+            rows="4"
+            [value]="comment"
+            placeholder="Írj egy rövid értékelést..."
+            (input)="onCommentChanged($any($event.target).value)"
+          ></textarea>
+        </label>
+
+        <div class="error-state" *ngIf="reviewErrorMessage">
+          {{ reviewErrorMessage }}
+        </div>
+
+        <button type="submit" [disabled]="isSavingReview">
+          {{ isSavingReview ? 'Mentés...' : 'Értékelés mentése' }}
+        </button>
+      </form>
+
+      <div class="review-list" *ngIf="reviews.length > 0; else noReviews">
+        <article class="review-card" *ngFor="let review of reviews">
+          <div>
+            <div class="review-header">
+              <strong>{{ review.reviewerName }}</strong>
+              <span>{{ review.score }}/5</span>
+            </div>
+
+            <p>{{ review.comment }}</p>
+          </div>
+
+          <button type="button" class="delete-button" (click)="deleteReview(review.id)">
+            Törlés
+          </button>
+        </article>
+      </div>
+
+      <ng-template #noReviews>
+        <div class="empty-state">
+          Ehhez a filmhez még nincs értékelés.
+        </div>
+      </ng-template>
+    </section>
+  </ng-container>
+</section>
