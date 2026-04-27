@@ -39,6 +39,10 @@ jobs:
             context: ./src/backend/MovieHub.ReviewsApi
             dockerfile: ./src/backend/MovieHub.ReviewsApi/Dockerfile
 
+          - image_name: moviehub-mcp-server
+            context: ./src/backend/MovieHub.McpServer
+            dockerfile: ./src/backend/MovieHub.McpServer/Dockerfile
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

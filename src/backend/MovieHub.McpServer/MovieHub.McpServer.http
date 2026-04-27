@@ -1,0 +1,6 @@
+@MovieHub.McpServer_HostAddress = http://localhost:5006
+
+GET {{MovieHub.McpServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

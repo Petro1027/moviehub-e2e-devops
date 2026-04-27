@@ -45,6 +45,18 @@ services:
       MongoDb__ReviewsCollectionName: reviews
     depends_on:
       - mongodb
+  
+  mcp-server:
+    build:
+      context: ./src/backend/MovieHub.McpServer
+      dockerfile: Dockerfile
+    container_name: moviehub-mcp-server
+    restart: unless-stopped
+    ports:
+      - "5054:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
 
   frontend:
     build:
@@ -57,6 +69,7 @@ services:
     depends_on:
       - catalog-api
       - reviews-api
+      - mcp-server
 
 volumes:
   moviehub-mongo-data:
