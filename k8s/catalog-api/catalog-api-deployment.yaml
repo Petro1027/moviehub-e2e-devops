@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-api
+  namespace: moviehub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-api
+  template:
+    metadata:
+      labels:
+        app: catalog-api
+    spec:
+      containers:
+        - name: catalog-api
+          image: ghcr.io/petro1027/moviehub-catalog-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: MongoDb__ConnectionString
+              value: mongodb://moviehub:moviehub-password@mongodb:27017/?authSource=admin
+            - name: MongoDb__DatabaseName
+              value: moviehub
+            - name: MongoDb__MoviesCollectionName
+              value: movies
