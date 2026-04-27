@@ -12,5 +12,39 @@ services:
     volumes:
       - moviehub-mongo-data:/data/db
 
+  catalog-api:
+    build:
+      context: ./src/backend/MovieHub.CatalogApi
+      dockerfile: Dockerfile
+    container_name: moviehub-catalog-api
+    restart: unless-stopped
+    ports:
+      - "5052:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://moviehub:moviehub-password@mongodb:27017/?authSource=admin
+      MongoDb__DatabaseName: moviehub
+      MongoDb__MoviesCollectionName: movies
+    depends_on:
+      - mongodb
+
+  reviews-api:
+    build:
+      context: ./src/backend/MovieHub.ReviewsApi
+      dockerfile: Dockerfile
+    container_name: moviehub-reviews-api
+    restart: unless-stopped
+    ports:
+      - "5053:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      MongoDb__ConnectionString: mongodb://moviehub:moviehub-password@mongodb:27017/?authSource=admin
+      MongoDb__DatabaseName: moviehub
+      MongoDb__ReviewsCollectionName: reviews
+    depends_on:
+      - mongodb
+
 volumes:
   moviehub-mongo-data:
