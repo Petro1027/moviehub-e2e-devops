@@ -9,6 +9,7 @@ The system contains:
 - Angular frontend
 - Catalog API
 - Reviews API
+- MCP Server
 - MongoDB
 - Docker Compose
 - Kubernetes manifests
@@ -78,6 +79,7 @@ Expected containers:
 moviehub-mongodb
 moviehub-catalog-api
 moviehub-reviews-api
+moviehub-mcp-server
 moviehub-frontend
 ```
 
@@ -87,6 +89,7 @@ Application URLs:
 Frontend:    http://localhost:8080
 Catalog API: http://localhost:5052/api/movies
 Reviews API: http://localhost:5053/api/reviews/movie/{movieId}
+MCP Server:  http://localhost:5054/health
 MongoDB:     localhost:27017
 ```
 
@@ -139,6 +142,29 @@ $createdReview = Invoke-RestMethod `
 $createdReview | ConvertTo-Json -Depth 5
 ```
 
+Test MCP Server health endpoint:
+
+```powershell
+Invoke-RestMethod http://localhost:5054/health | ConvertTo-Json -Depth 5
+```
+
+Test MCP tools list:
+
+```powershell
+$body = @{
+    jsonrpc = "2.0"
+    id = 1
+    method = "tools/list"
+    params = @{}
+} | ConvertTo-Json -Depth 5
+
+Invoke-RestMethod `
+    -Uri "http://localhost:5054/mcp" `
+    -Method Post `
+    -Body $body `
+    -ContentType "application/json" | ConvertTo-Json -Depth 10
+```
+
 Open frontend:
 
 ```text
@@ -161,6 +187,7 @@ The workflow builds and pushes these Docker images:
 ghcr.io/petro1027/moviehub-frontend:latest
 ghcr.io/petro1027/moviehub-catalog-api:latest
 ghcr.io/petro1027/moviehub-reviews-api:latest
+ghcr.io/petro1027/moviehub-mcp-server:latest
 ```
 
 To check CI:
@@ -174,7 +201,16 @@ To check images:
 
 1. Open the GitHub repository.
 2. Check the `Packages` section.
-3. Confirm that the three packages are visible.
+3. Confirm that the four custom packages are visible.
+
+Expected packages:
+
+```text
+moviehub-frontend
+moviehub-catalog-api
+moviehub-reviews-api
+moviehub-mcp-server
+```
 
 ---
 
@@ -228,6 +264,12 @@ Apply Reviews API:
 kubectl apply -f k8s/reviews-api/
 ```
 
+Apply MCP Server:
+
+```powershell
+kubectl apply -f k8s/mcp-server/
+```
+
 Apply Frontend:
 
 ```powershell
@@ -246,6 +288,7 @@ Expected pods:
 mongodb       Running
 catalog-api   Running
 reviews-api   Running
+mcp-server    Running
 frontend      Running
 ```
 
@@ -261,6 +304,7 @@ Expected services:
 mongodb
 catalog-api
 reviews-api
+mcp-server
 frontend
 ```
 
@@ -268,7 +312,7 @@ frontend
 
 ## 9. Test Kubernetes deployment with port-forward
 
-Open three separate terminals.
+Open four separate terminals.
 
 Catalog API:
 
@@ -280,6 +324,12 @@ Reviews API:
 
 ```powershell
 kubectl port-forward svc/reviews-api 5053:8080 -n moviehub
+```
+
+MCP Server:
+
+```powershell
+kubectl port-forward svc/mcp-server 5054:8080 -n moviehub
 ```
 
 Frontend:
@@ -303,10 +353,80 @@ Test:
 - reviews are displayed
 - review creation works
 - review deletion works
+- MCP Server health endpoint works
+- MCP Server tools/list works
 
 ---
 
-## 10. ArgoCD installation
+## 10. MCP Server test
+
+Health endpoint:
+
+```powershell
+Invoke-RestMethod http://localhost:5054/health | ConvertTo-Json -Depth 5
+```
+
+Expected result:
+
+```text
+service: MovieHub.McpServer
+status: Healthy
+```
+
+Tools list:
+
+```powershell
+$body = @{
+    jsonrpc = "2.0"
+    id = 1
+    method = "tools/list"
+    params = @{}
+} | ConvertTo-Json -Depth 5
+
+Invoke-RestMethod `
+    -Uri "http://localhost:5054/mcp" `
+    -Method Post `
+    -Body $body `
+    -ContentType "application/json" | ConvertTo-Json -Depth 10
+```
+
+Expected tools:
+
+```text
+get_project_info
+get_architecture_summary
+get_deployment_checklist
+```
+
+Tool call:
+
+```powershell
+$body = @{
+    jsonrpc = "2.0"
+    id = 2
+    method = "tools/call"
+    params = @{
+        name = "get_deployment_checklist"
+        arguments = @{}
+    }
+} | ConvertTo-Json -Depth 10
+
+Invoke-RestMethod `
+    -Uri "http://localhost:5054/mcp" `
+    -Method Post `
+    -Body $body `
+    -ContentType "application/json" | ConvertTo-Json -Depth 10
+```
+
+Expected result:
+
+```text
+Deployment checklist
+```
+
+---
+
+## 11. ArgoCD installation
 
 Create namespace:
 
@@ -337,7 +457,7 @@ argocd-redis                    Running
 
 ---
 
-## 11. Access ArgoCD UI
+## 12. Access ArgoCD UI
 
 Start port-forward:
 
@@ -366,7 +486,7 @@ $encodedPassword = kubectl -n argocd get secret argocd-initial-admin-secret -o j
 
 ---
 
-## 12. ArgoCD Application
+## 13. ArgoCD Application
 
 The ArgoCD Application manifest is located here:
 
@@ -400,9 +520,25 @@ Synced
 Sync OK
 ```
 
+The application should include:
+
+```text
+namespace/moviehub
+deployment/mongodb
+service/mongodb
+deployment/catalog-api
+service/catalog-api
+deployment/reviews-api
+service/reviews-api
+deployment/mcp-server
+service/mcp-server
+deployment/frontend
+service/frontend
+```
+
 ---
 
-## 13. Test ArgoCD-managed deployment
+## 14. Test ArgoCD-managed deployment
 
 Check resources:
 
@@ -421,6 +557,10 @@ kubectl port-forward svc/reviews-api 5053:8080 -n moviehub
 ```
 
 ```powershell
+kubectl port-forward svc/mcp-server 5054:8080 -n moviehub
+```
+
+```powershell
 kubectl port-forward svc/frontend 8080:80 -n moviehub
 ```
 
@@ -436,10 +576,13 @@ Verify:
 - movie details page works
 - review creation works
 - review deletion works
+- MCP Server health endpoint works
+- MCP Server tools/list works
+- ArgoCD application is Healthy and Synced
 
 ---
 
-## 14. Troubleshooting
+## 15. Troubleshooting
 
 ### Frontend cannot load movies
 
@@ -463,6 +606,20 @@ Check that Reviews API port-forward is running:
 kubectl port-forward svc/reviews-api 5053:8080 -n moviehub
 ```
 
+### MCP Server is not available
+
+Check that MCP Server port-forward is running:
+
+```powershell
+kubectl port-forward svc/mcp-server 5054:8080 -n moviehub
+```
+
+Check health endpoint:
+
+```powershell
+Invoke-RestMethod http://localhost:5054/health | ConvertTo-Json -Depth 5
+```
+
 ### Pod cannot pull GHCR image
 
 Check pod status:
@@ -474,7 +631,7 @@ kubectl get pods -n moviehub
 Describe pod:
 
 ```powershell
-kubectl describe pod -l app=catalog-api -n moviehub
+kubectl describe pod -l app=mcp-server -n moviehub
 ```
 
 Possible causes:
@@ -482,6 +639,7 @@ Possible causes:
 - GHCR package is private
 - image name is wrong
 - image tag does not exist
+- GitHub Actions workflow has not pushed the image yet
 
 ### ArgoCD application is OutOfSync
 
@@ -489,7 +647,7 @@ Open ArgoCD UI and click `SYNC`, or wait for auto sync.
 
 ---
 
-## 15. Cleanup
+## 16. Cleanup
 
 Delete MovieHub namespace:
 

@@ -14,6 +14,8 @@ The application allows users to:
 - create a new review
 - delete an existing review
 
+The project also contains a custom MCP Server component, which provides project and deployment information through MCP-style tools.
+
 ---
 
 ## 2. Opening the application
@@ -231,7 +233,62 @@ After successful deletion, the review disappears from the list.
 
 ---
 
-## 11. Main user flow
+## 11. MCP Server
+
+The project contains a custom MCP Server component.
+
+The MCP Server is an independent backend component.
+
+Runtime URL:
+
+```text
+http://localhost:5054
+```
+
+Health endpoint:
+
+```text
+GET http://localhost:5054/health
+```
+
+MCP endpoint:
+
+```text
+POST http://localhost:5054/mcp
+```
+
+Supported MCP methods:
+
+```text
+initialize
+tools/list
+tools/call
+```
+
+Available tools:
+
+```text
+get_project_info
+get_architecture_summary
+get_deployment_checklist
+```
+
+Example tools/list request:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/list",
+  "params": {}
+}
+```
+
+The MCP Server can be used to demonstrate that the project contains an additional independent backend component beyond the main application APIs.
+
+---
+
+## 12. Main user flow
 
 A typical user flow:
 
@@ -245,7 +302,7 @@ A typical user flow:
 
 ---
 
-## 12. Demo scenario
+## 13. Demo scenario
 
 This scenario can be used during presentation.
 
@@ -262,6 +319,7 @@ Or Kubernetes with port-forwarding:
 ```powershell
 kubectl port-forward svc/catalog-api 5052:8080 -n moviehub
 kubectl port-forward svc/reviews-api 5053:8080 -n moviehub
+kubectl port-forward svc/mcp-server 5054:8080 -n moviehub
 kubectl port-forward svc/frontend 8080:80 -n moviehub
 ```
 
@@ -306,9 +364,25 @@ Comment: ArgoCD-val telepitett Kubernetes rendszer mukodik.
 
 Click `Törlés`.
 
+### Step 8: Show MCP Server
+
+Open or test:
+
+```text
+http://localhost:5054/health
+```
+
+Then run a tools/list request against:
+
+```text
+POST http://localhost:5054/mcp
+```
+
+Explain that this is the independent MCP Server backend component.
+
 ---
 
-## 13. Technical explanation
+## 14. Technical explanation
 
 The application demonstrates a complete end-to-end workflow.
 
@@ -323,6 +397,7 @@ Backend:
 ```text
 ASP.NET Catalog API
 ASP.NET Reviews API
+ASP.NET MCP Server
 ```
 
 Database:
@@ -363,7 +438,7 @@ ArgoCD automatically syncs Kubernetes manifests from GitHub
 
 ---
 
-## 14. Required local ports
+## 15. Required local ports
 
 When running the system through Docker Compose or Kubernetes port-forwarding, these ports are used:
 
@@ -371,6 +446,7 @@ When running the system through Docker Compose or Kubernetes port-forwarding, th
 Frontend:    localhost:8080
 Catalog API: localhost:5052
 Reviews API: localhost:5053
+MCP Server:  localhost:5054
 ```
 
 If the frontend cannot load movies, check that Catalog API is available:
@@ -385,6 +461,12 @@ If the frontend cannot load reviews, check that Reviews API is available:
 kubectl port-forward svc/reviews-api 5053:8080 -n moviehub
 ```
 
+If the MCP Server is not available, check:
+
+```powershell
+kubectl port-forward svc/mcp-server 5054:8080 -n moviehub
+```
+
 If the frontend is not available, check:
 
 ```powershell
@@ -393,7 +475,7 @@ kubectl port-forward svc/frontend 8080:80 -n moviehub
 
 ---
 
-## 15. Summary
+## 16. Summary
 
 Implemented user-facing features:
 
@@ -404,5 +486,15 @@ Implemented user-facing features:
 - review list
 - review creation
 - review deletion
+
+Implemented technical demonstration features:
+
+- independent MCP Server component
+- MCP health endpoint
+- MCP tools/list endpoint
+- MCP tools/call endpoint
+- Docker Compose deployment
+- Kubernetes deployment
+- ArgoCD GitOps deployment
 
 The application is suitable for demonstrating full-stack development and DevOps deployment workflows.

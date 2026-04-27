@@ -9,6 +9,7 @@ The project includes:
 - Angular frontend application
 - ASP.NET backend services
 - MongoDB database
+- custom MCP Server component
 - Docker containerization
 - Docker Compose local runtime
 - GitHub Actions CI workflow
@@ -154,6 +155,52 @@ http://localhost:5053
 
 ---
 
+### MCP Server
+
+Technology:
+
+- ASP.NET
+- C#
+- JSON-RPC style endpoint
+
+Responsibilities:
+
+- provide an independent backend component for MCP-related functionality
+- expose MovieHub project information through MCP tools
+- expose architecture summary through MCP tools
+- expose deployment checklist through MCP tools
+
+Main endpoints:
+
+```text
+GET  /health
+POST /mcp
+```
+
+Supported MCP methods:
+
+```text
+initialize
+tools/list
+tools/call
+```
+
+Available tools:
+
+```text
+get_project_info
+get_architecture_summary
+get_deployment_checklist
+```
+
+Runtime URL:
+
+```text
+http://localhost:5054
+```
+
+---
+
 ### MongoDB
 
 Technology:
@@ -200,9 +247,14 @@ Angular Frontend
  |                                        MongoDB
  |
  |--- GET/POST/DELETE /api/reviews --------> Reviews API
+ |                                           |
+ |                                           v
+ |                                        MongoDB
+ |
+ |--- POST /mcp ---------------------------> MCP Server
                                              |
                                              v
-                                          MongoDB
+                                      Project helper tools
 ```
 
 ---
@@ -215,6 +267,7 @@ The system uses the following containers:
 moviehub-frontend
 moviehub-catalog-api
 moviehub-reviews-api
+moviehub-mcp-server
 mongo:8
 ```
 
@@ -224,6 +277,7 @@ Custom images are built by GitHub Actions and pushed to GitHub Container Registr
 ghcr.io/petro1027/moviehub-frontend:latest
 ghcr.io/petro1027/moviehub-catalog-api:latest
 ghcr.io/petro1027/moviehub-reviews-api:latest
+ghcr.io/petro1027/moviehub-mcp-server:latest
 ```
 
 ---
@@ -235,6 +289,7 @@ Docker Compose runs:
 - MongoDB
 - Catalog API
 - Reviews API
+- MCP Server
 - Angular frontend
 
 Local URLs:
@@ -243,6 +298,7 @@ Local URLs:
 Frontend:    http://localhost:8080
 Catalog API: http://localhost:5052/api/movies
 Reviews API: http://localhost:5053/api/reviews/movie/{movieId}
+MCP Server:  http://localhost:5054/health
 MongoDB:     localhost:27017
 ```
 
@@ -262,6 +318,8 @@ Main Kubernetes resources:
 - Catalog API service
 - Reviews API deployment
 - Reviews API service
+- MCP Server deployment
+- MCP Server service
 - Frontend deployment
 - Frontend service
 
@@ -277,6 +335,7 @@ Kubernetes services:
 mongodb
 catalog-api
 reviews-api
+mcp-server
 frontend
 ```
 
@@ -296,7 +355,17 @@ The workflow:
 2. builds the frontend Docker image
 3. builds the Catalog API Docker image
 4. builds the Reviews API Docker image
-5. pushes all images to GitHub Container Registry
+5. builds the MCP Server Docker image
+6. pushes all images to GitHub Container Registry
+
+Published images:
+
+```text
+ghcr.io/petro1027/moviehub-frontend:latest
+ghcr.io/petro1027/moviehub-catalog-api:latest
+ghcr.io/petro1027/moviehub-reviews-api:latest
+ghcr.io/petro1027/moviehub-mcp-server:latest
+```
 
 ---
 
@@ -348,6 +417,7 @@ This project demonstrates:
 - REST API design
 - MongoDB integration
 - microservice-based backend design
+- custom MCP Server implementation
 - Docker containerization
 - Docker Compose orchestration
 - CI workflow
