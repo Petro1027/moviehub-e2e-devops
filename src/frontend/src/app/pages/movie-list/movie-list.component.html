@@ -1,0 +1,65 @@
+<section class="movie-list-page">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">MovieHub Catalog</p>
+      <h1>Filmek</h1>
+      <p class="subtitle">
+        Egyszerű filmkatalógus kereséssel és lapozással. A következő lépésben ezt a backend API-ról fogjuk tölteni.
+      </p>
+    </div>
+
+    <div class="status-card">
+      <span>Filmek száma</span>
+      <strong>{{ filteredMovies.length }}</strong>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <label for="movie-search">Keresés cím, rendező vagy műfaj alapján</label>
+    <input
+      id="movie-search"
+      type="text"
+      [value]="searchTerm"
+      placeholder="Például: nolan, sci-fi, matrix"
+      (input)="onSearchChanged($any($event.target).value)"
+    />
+  </div>
+
+  <div class="movie-grid" *ngIf="pagedMovies.length > 0; else emptyState">
+    <article class="movie-card" *ngFor="let movie of pagedMovies">
+      <div class="movie-card-header">
+        <span class="genre">{{ movie.genre }}</span>
+        <span class="rating">{{ movie.rating }}/10</span>
+      </div>
+
+      <h2>{{ movie.title }}</h2>
+
+      <p class="meta">
+        {{ movie.director }} · {{ movie.year }}
+      </p>
+
+      <p class="description">
+        {{ movie.description }}
+      </p>
+    </article>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <h2>Nincs találat</h2>
+      <p>Próbálj másik keresési kifejezést.</p>
+    </div>
+  </ng-template>
+
+  <div class="pagination">
+    <button type="button" (click)="previousPage()" [disabled]="page === 1">
+      Előző
+    </button>
+
+    <span>{{ page }} / {{ totalPages }}</span>
+
+    <button type="button" (click)="nextPage()" [disabled]="page === totalPages">
+      Következő
+    </button>
+  </div>
+</section>
