@@ -175,4 +175,23 @@ h1 {
   .movie-grid {
     grid-template-columns: 1fr;
   }
+
+  .loading-state,
+  .error-state {
+    border-radius: 1.5rem;
+    padding: 1.25rem;
+    font-weight: 700;
+  }
+
+  .loading-state {
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  .error-state {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+  }
 }

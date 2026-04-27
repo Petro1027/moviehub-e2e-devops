@@ -8,6 +8,19 @@ builder.Services.Configure<MongoDbSettings>(
 
 builder.Services.AddSingleton<MovieService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:4200",
+                "http://localhost:8080")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
@@ -20,6 +33,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseCors("Frontend");
 
 app.UseAuthorization();
 
